@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Restoring Roots — School Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#f5f5f3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+#app{min-height:100vh;max-width:600px;margin:0 auto;background:#f5f5f3;position:relative}
+.tb{background:#5b2d8e;color:white;padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
+.tb h1{font-size:15px;font-weight:500;color:white}
+.tb-r{display:flex;align-items:center;gap:8px}
+.pill{background:rgba(255,255,255,.2);border-radius:20px;padding:3px 11px;font-size:11px;cursor:pointer;border:none;color:white;touch-action:manipulation}
+.gear{background:rgba(255,255,255,.15);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.tabs{display:flex;background:white;border-bottom:.5px solid #e0e0e0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{flex:1;min-width:54px;padding:9px 4px;font-size:11px;text-align:center;cursor:pointer;border:none;background:none;color:#666;white-space:nowrap;touch-action:manipulation}
+.tab.on{color:#5b2d8e;border-bottom:2px solid #5b2d8e;font-weight:500}
+.pg{padding:10px}
+.bx{display:inline-block;padding:2px 7px;border-radius:9px;font-size:10px;font-weight:500}
+.bx-nd{background:#eee;color:#666}.bx-pt{background:#f3eeff;color:#3a1a6a}.bx-pn{background:#fff8e1;color:#5c3a08}
+.bx-ok{background:#e8f5e8;color:#1a4a1a}.bx-rd{background:#fdecea;color:#5c0f0f}.bx-gr{background:#eee;color:#888}
+.sc{background:white;border-radius:9px;border:.5px solid #e0e0e0;border-left:3px solid #5b2d8e;margin-bottom:7px;padding:9px 11px}
+.sc.rd{border-left-color:#c0392b;background:#fdecea}.sc.ok{border-left-color:#2d7a2d;background:#e8f5e8}
+.sc.pn{border-left-color:#d4a017;background:#fff8e1}.sc.gr{border-left-color:#aaa;background:#f5f5f3;opacity:.65}
+.sc.pt{border-left-color:#7b52c8;background:#f3eeff}
+.sc-row{display:flex;align-items:center;gap:9px}
+.sc-info{flex:1;min-width:0}
+.sc-name{font-size:13px;font-weight:500;color:#222}
+.dtag{font-size:10px;background:#e8f5e8;color:#1a4a1a;border-radius:5px;padding:1px 6px;margin-left:5px}
+.pips{display:flex;gap:5px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.pip{width:38px;height:38px;border-radius:8px;border:2px solid #5b2d8e;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#5b2d8e;flex-shrink:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.pip.f{background:#5b2d8e;color:white}.pip.lk{border-color:#ccc;background:#f0f0f0;color:#bbb;cursor:default}
+.pip.sb{background:#d4a017;border-color:#d4a017;color:white;cursor:default}
+.pip.ap{background:#2d7a2d;border-color:#2d7a2d;color:white;cursor:default}
+.pip.rp{background:#c0392b;border-color:#c0392b;color:white;cursor:default}
+.jacts{display:flex;gap:5px;flex-wrap:wrap}
+.ab{padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid;font-weight:500;touch-action:manipulation}
+.ab-ok{background:#e8f5e8;color:#1a4a1a;border-color:#2d7a2d}
+.ab-rd{background:#fdecea;color:#5c0f0f;border-color:#c0392b}
+.ab-sc{background:#e8ecf5;color:#1a2a5c;border-color:#5b2d8e}
+.nb{background:#fdecea;border:1px solid #c0392b;border-radius:6px;padding:4px 9px;font-size:11px;color:#5c0f0f;cursor:pointer;flex-shrink:0}
+.sh{font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.05em;margin:13px 0 7px}
+.mbg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200}
+.md{background:white;border-radius:12px;padding:20px;width:90%;max-width:340px;max-height:85vh;overflow-y:auto}
+.md h2{font-size:15px;font-weight:500;margin-bottom:8px}
+.md-sub{font-size:12px;color:#666;margin-bottom:11px}
+.md-note{background:#fdecea;border-left:3px solid #c0392b;border-radius:0 8px 8px 0;padding:9px 11px;font-size:13px;color:#5c0f0f;margin-bottom:14px;line-height:1.5}
+.md-acts{display:flex;gap:7px;margin-top:10px}
+.btn-red{flex:1;padding:11px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer}
+.btn-cxl{padding:11px 16px;border-radius:8px;border:1px solid #ccc;background:none;cursor:pointer;font-size:13px;color:#222}
+.btn-pur{padding:11px 16px;border-radius:8px;background:#5b2d8e;color:white;border:none;cursor:pointer;font-size:13px;font-weight:500}
+.ta{width:100%;border:1px solid #ccc;border-radius:8px;padding:9px;font-size:14px;resize:none;height:80px;font-family:inherit;background:white;color:#222}
+.inp{border:1px solid #ccc;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;background:white;color:#222}
+.login{padding:40px 20px;text-align:center}
+.login h2{font-size:22px;font-weight:500;color:#5b2d8e;margin-bottom:8px}
+.login p{font-size:14px;color:#666;margin-bottom:24px}
+.lbtn{display:block;width:100%;padding:14px;margin-bottom:10px;border-radius:12px;border:2px solid #5b2d8e;font-size:15px;font-weight:500;cursor:pointer;touch-action:manipulation}
+.lbtn.j{background:#5b2d8e;color:white}.lbtn.k{background:#fffbe0;color:#5b2d8e}
+.kp{padding:12px;margin-bottom:10px;border-radius:12px;border:2px solid #5b2d8e;background:white;cursor:pointer;display:flex;align-items:center;gap:12px;touch-action:manipulation}
+.av{width:40px;height:40px;border-radius:50%;background:#5b2d8e;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;flex-shrink:0}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kcard{border-radius:9px;border:2px solid #5b2d8e;padding:10px;cursor:pointer;touch-action:manipulation}
+.kcard.tj{background:#fffbe0}.kcard.laura{background:#e8f8f5}.kcard.audrey{background:#fce8f0}.kcard.zach{background:#e8eef8}
+.kcard-nm{font-size:13px;font-weight:500;margin-bottom:5px}
+.kcard.tj .kcard-nm{color:#5c4800}.kcard.laura .kcard-nm{color:#0f5040}.kcard.audrey .kcard-nm{color:#5c1035}.kcard.zach .kcard-nm{color:#0f2060}
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-ok{background:#2d7a2d}.dot-rd{background:#c0392b}.dot-pn{background:#d4a017}.dot-nd{background:#ccc}.dot-pt{background:#7b52c8}.dot-gr{background:#bbb}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid #5b2d8e;background:white}
+.pin-dot.on{background:#5b2d8e}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto}
+.pin-key{padding:18px;border-radius:10px;border:1px solid #ddd;background:white;font-size:20px;font-weight:500;cursor:pointer;text-align:center;color:#222;touch-action:manipulation}
+.pin-key:active{background:#f0f0f0}
+.pb-wrap{background:#e0e0e0;border-radius:4px;height:6px;flex:1;overflow:hidden}
+.pb{height:100%;background:#5b2d8e;border-radius:4px;transition:width .3s}
+.hr{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:.5px solid #eee;font-size:12px}
+.flt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.fs{padding:5px 12px;border-radius:15px;font-size:12px;cursor:pointer;border:1px solid #5b2d8e;background:none;color:#5b2d8e;touch-action:manipulation}
+.fs.on{background:#5b2d8e;color:white}
+.sp{position:fixed;top:0;left:0;right:0;bottom:0;background:white;z-index:100;overflow-y:auto;max-width:600px;margin:0 auto}
+.sp-tb{background:#5b2d8e;color:white;padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
+.sp-tb h1{color:white;font-size:15px;font-weight:500}
+.sp-sec{padding:14px 14px 0}
+.sp-sec h3{font-size:13px;font-weight:500;color:#5b2d8e;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e8e0f5}
+.sp-kid{margin-bottom:18px}
+.sp-kn{font-size:13px;font-weight:500;margin-bottom:8px;padding:6px 10px;border-radius:8px}
+.sp-kn.tj{background:#fffbe0;color:#5c4800}.sp-kn.laura{background:#e8f8f5;color:#0f5040}
+.sp-kn.audrey{background:#fce8f0;color:#5c1035}.sp-kn.zach{background:#e8eef8;color:#0f2060}
+.sp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #eee}
+.tg{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid;touch-action:manipulation}
+.tg.locked{background:#fdecea;color:#5c0f0f;border-color:#c0392b}
+.tg.open{background:#e8f5e8;color:#1a4a1a;border-color:#2d7a2d}
+.gn{font-size:10px;color:#c0392b;margin-left:8px}
+.ibox{background:#e8ecf5;border-radius:8px;padding:10px 12px;margin:14px;font-size:12px;color:#1a2a5c;line-height:1.6}
+.ch-sel{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #5b2d8e;font-size:14px;background:white;color:#222;cursor:pointer;margin-bottom:10px}
+.vr{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:.5px solid #eee}
+.vr:last-child{border-bottom:none}
+.vn{font-size:12px;font-weight:600;color:#5b2d8e;min-width:26px;padding-top:2px;flex-shrink:0}
+.vt{flex:1;min-width:0;font-size:13px;color:#222;line-height:1.6}
+.vt-none{font-size:11px;color:#bbb;font-style:italic}
+.vadd{width:32px;height:32px;border-radius:50%;border:2px solid #5b2d8e;background:none;color:#5b2d8e;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;touch-action:manipulation}
+.vadd.on{background:#5b2d8e;color:white}.vadd.mem{background:#2d7a2d;border-color:#2d7a2d;color:white;cursor:default}
+.ev{font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid #ccc;background:none;cursor:pointer;color:#888;margin-top:3px}
+.qvc{background:white;border-radius:9px;border:.5px solid #e0e0e0;border-left:3px solid #7b52c8;margin-bottom:8px;padding:10px 12px}
+.qvc.mem{border-left-color:#2d7a2d;background:#e8f5e8}.qvc.pc{border-left-color:#d4a017;background:#fff8e1}
+.qcr{display:flex;gap:5px;margin-top:8px;align-items:center}
+.qck{width:28px;height:28px;border-radius:6px;border:2px solid #5b2d8e;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#5b2d8e;font-weight:700;flex-shrink:0;touch-action:manipulation}
+.qck.on{background:#5b2d8e;color:white;border-color:#5b2d8e}
+.rl{font-size:11px;font-weight:600;color:#5b2d8e;margin-bottom:3px}
+.rl.mem{color:#2d7a2d}
+.qkh{padding:6px 10px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:8px}
+.qkh.tj{background:#fffbe0;color:#5c4800}.qkh.laura{background:#e8f8f5;color:#0f5040}
+.qkh.audrey{background:#fce8f0;color:#5c1035}.qkh.zach{background:#e8eef8;color:#0f2060}
+.vsh{font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.04em;margin:10px 0 6px}
+.niv-inp{width:100%;border:1px solid #ccc;border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;background:white;color:#222;resize:vertical;min-height:64px;line-height:1.5}
+.niv-row{padding:9px 0;border-bottom:.5px solid #eee}
+.niv-row:last-child{border-bottom:none}
+.niv-lbl{font-size:12px;font-weight:600;color:#5b2d8e;margin-bottom:4px}
+.mic{display:flex;align-items:center;gap:6px;padding:9px 15px;border-radius:20px;border:2px solid #5b2d8e;background:none;color:#5b2d8e;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px;touch-action:manipulation}
+.mic.on{background:#c0392b;border-color:#c0392b;color:white;animation:mp 1s infinite}
+@keyframes mp{0%,100%{opacity:1}50%{opacity:.6}}
+.vres{margin-top:10px;padding:10px;background:#f5f5f3;border-radius:8px;font-size:13px;line-height:2}
+.wok{color:#1a4a1a;background:#c8ecd0;border-radius:3px;padding:1px 4px;margin:1px}
+.wng{color:#5c0f0f;background:#f7c1c1;border-radius:3px;padding:1px 4px;margin:1px;text-decoration:line-through}
+.wms{color:#5c3a08;background:#fde8c0;border-radius:3px;padding:1px 4px;margin:1px;font-style:italic}
+.vscore{font-size:13px;font-weight:500;margin-top:8px}
+.vscore.pass{color:#1a4a1a}.vscore.fail{color:#5c0f0f}
+.vtx{font-size:12px;color:#666;margin-top:4px;font-style:italic}
+.spk{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:15px;border:1px solid #7b52c8;background:none;color:#7b52c8;font-size:12px;cursor:pointer;margin-top:6px;touch-action:manipulation}
+.pbdg{display:inline-flex;align-items:center;gap:4px;background:#fff8e1;border:1px solid #d4a017;border-radius:6px;padding:4px 9px;font-size:11px;color:#5c3a08;margin-top:5px}
+.dpb{display:flex;height:14px;border-radius:7px;overflow:hidden;background:#e0e0e0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const TODAY=new Date().toISOString().slice(0,10);
+const DOW=new Date().getDay();
+const MAX_PIP=5,NEED=5;
+
+const BASE={
+  tj:{name:'TJ',color:'tj',pin:'1234',
+    subjects:['Bible/Quizzing','Math','Speed Drill','Language','Penmanship','Spelling','Reading','Science','Social Studies'],
+    confirmOnly:['Speed Drill'],
+    req:{'Math':2,'Language':2,'Social Studies':2,'Science':2,'Bible/Quizzing':1,'Speed Drill':1,'Penmanship':1,'Spelling':1,'Reading':1},
+    satReq:{'Math':2,'Language':2,'Social Studies':2},sunReq:{'Math':2,'Language':2,'Social Studies':1},
+    wknd:['Math','Language','Social Studies']},
+  laura:{name:'Laura',color:'laura',pin:'2345',
+    subjects:['Bible/Quizzing','Math','Speed Drill','Language Arts','Penmanship','Spelling','Reading','Science','History'],
+    confirmOnly:['Speed Drill','Spelling'],
+    req:{'Math':2,'Language Arts':2,'History':2,'Science':2},
+    satReq:{'Math':2,'Language Arts':2,'History':2},sunReq:{'Math':2,'Language Arts':2,'History':1},
+    wknd:['Math','Language Arts','History']},
+  audrey:{name:'Audrey',color:'audrey',pin:'3456',
+    subjects:['Bible/Quizzing','Math','Grammar Red','Grammar Purple','Spelling','Penmanship','Literature','Reading','Science','History','Typing'],
+    confirmOnly:['Spelling'],req:{},satReq:{},sunReq:{},wknd:[]},
+  zach:{name:'Zachary',color:'zach',pin:'4567',
+    subjects:['Bible Study','CLE Science','CLE Social Studies','Beginning Wisely','Algebra','Math Sheets','Reading'],
+    confirmOnly:[],req:{},satReq:{},sunReq:{},wknd:[]}
+};
+const JVC={1:51,2:25,3:36,4:54,5:47,6:71,7:53,8:59,9:41,10:42,11:57,12:50,13:38,14:31,15:27,16:33,17:26,18:40,19:42,20:31,21:25};
+
+function load(){try{const r=localStorage.getItem('rr_v8');return r?JSON.parse(r):null}catch(e){return null}}
+function save(s){try{localStorage.setItem('rr_v8',JSON.stringify(s))}catch(e){}}
+function initS(){
+  const sv=load();
+  if(sv){
+    sv.graduated=sv.graduated||{tj:['Bible/Quizzing'],laura:['Reading','Bible/Quizzing'],audrey:[],zach:[]};
+    sv.quizzing=sv.quizzing||{tj:{},laura:{},audrey:{},zach:{}};
+    sv.nivText=sv.nivText||{};
+    return sv;
+  }
+  const s={subjects:{},history:[],
+    graduated:{tj:['Bible/Quizzing'],laura:['Reading','Bible/Quizzing'],audrey:[],zach:[]},
+    quizzing:{tj:{},laura:{},audrey:{},zach:{}},nivText:{}};
+  Object.keys(BASE).forEach(k=>{s.subjects[k]={};BASE[k].subjects.forEach(sub=>{s.subjects[k][sub]={status:'notdone',lessons:0,redoNote:'',score:'',redoSeen:false}})});
+  return s;
+}
+let S=initS();
+function persist(){save(S)}
+
+// getters
+function isGrad(k,s){return(S.graduated[k]||[]).includes(s)}
+function ss(k,s){return S.subjects[k]?.[s]||{status:'notdone',lessons:0,redoNote:'',score:'',redoSeen:false}}
+function gst(k,s){return ss(k,s).status||'notdone'}
+function gl(k,s){return ss(k,s).lessons||0}
+function getReq(k,s){const b=BASE[k];if(DOW===6&&b.satReq[s])return b.satReq[s];if(DOW===0&&b.sunReq[s])return b.sunReq[s];return b.req[s]||1}
+function isToday(k,s){const b=BASE[k];if((DOW===6||DOW===0)&&b.wknd.length)return b.wknd.includes(s);return true}
+function rdPend(k){return BASE[k].subjects.filter(s=>gst(k,s)==='redo'&&!ss(k,s).redoSeen)}
+function allRd(){return Object.keys(BASE).filter(k=>rdPend(k).length>0)}
+function pendQ(){const o=[];Object.keys(BASE).forEach(k=>BASE[k].subjects.forEach(s=>{if(gst(k,s)==='pending')o.push({kid:k,sub:s})}));return o}
+function logH(k,s,a,d=''){S.history=S.history||[];S.history.push({date:TODAY,kid:k,subject:s,action:a,detail:d,ts:Date.now()})}
+function dayProg(k){let done=0,total=0;BASE[k].subjects.forEach(s=>{if(isGrad(k,s)||!isToday(k,s))return;const req=getReq(k,s),got=gl(k,s),st=gst(k,s);total+=req;done+=st==='satisfied'||st==='pending'?req:Math.min(got,req)});return{done,total}}
+function getNIV(c,v){return S.nivText[c+':'+v]||''}
+function hasV(k,c,v){return!!(S.quizzing[k]?.[c+':'+v])}
+function vChk(k,c,v){return S.quizzing[k]?.[c+':'+v]?.checks||0}
+function isMem(k,c,v){return vChk(k,c,v)>=NEED}
+function kStats(k){const d=S.quizzing[k]||{};const ks=Object.keys(d);return{total:ks.length,mem:ks.filter(x=>d[x].checks>=NEED).length}}
+
+// voice
+function cleanW(w){return w.toLowerCase().replace(/[^a-z0-9']/g,'')}
+function cmpVerse(verse,heard){
+  const vw=verse.trim().split(/\s+/),sw=heard.trim().split(/\s+/);
+  const res=[];let ok=0;
+  for(let i=0;i<vw.length;i++){const v=cleanW(vw[i]),s=sw[i]?cleanW(sw[i]):'';
+    if(!s)res.push({word:vw[i],status:'missing'});
+    else if(v===s){res.push({word:vw[i],status:'correct'});ok++;}
+    else res.push({word:vw[i],spoken:sw[i],status:'wrong'});}
+  const pct=Math.round(ok/vw.length*100);
+  return{res,pct,passed:pct===100};
+}
+function speak(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=0.85;speechSynthesis.speak(u)}
+function listenV(kid,key){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Speech recognition not supported. Use Chrome or Safari.');return;}
+  if(recog){try{recog.stop()}catch(e){}}
+  recog=new SR();recog.continuous=false;recog.interimResults=false;recog.lang='en-US';
+  aVK=kid+'_'+key;render();
+  recog.onresult=e=>{
+    const heard=e.results[0][0].transcript;
+    const[c,v]=key.split(':');const verse=getNIV(c,v);
+    if(!verse){aVK=null;render();return;}
+    const{res,pct,passed}=cmpVerse(verse,heard);
+    vR[kid+'_'+key]={kid,key,heard,res,pct,passed,pending:passed};
+    aVK=null;if(!passed)setTimeout(()=>speak(verse),400);
+    persist();render();
+  };
+  recog.onerror=e=>{aVK=null;if(e.error!=='aborted')alert('Mic error: '+e.error);render()};
+  recog.onend=()=>{if(aVK===kid+'_'+key){aVK=null;render();}};
+  recog.start();
+}
+function stopListen(){if(recog){try{recog.stop()}catch(e){}}aVK=null;render()}
+
+// shared builders
+function topbar(title,right){return`<div class="tb"><h1>${title}</h1><div class="tb-r">${right||''}</div></div>`}
+function progBar(done,total){const p=total?Math.round(done/total*100):0;return`<div style="background:white;padding:8px 14px;border-bottom:.5px solid #eee;display:flex;align-items:center;gap:10px"><div class="pb-wrap"><div class="pb" style="width:${p}%"></div></div><span style="font-size:12px;color:#666;white-space:nowrap">${done}/${total} lessons</span></div>`}
+function dualBar(mem,total){const p=total?Math.round(mem/total*100):0;return`<div class="dpb"><div style="width:${p}%;background:#2d7a2d"></div><div style="width:${100-p}%;background:#7b52c8;opacity:.4"></div></div><div style="display:flex;gap:14px;margin-top:5px;font-size:10px;color:#888"><span><span style="width:9px;height:9px;border-radius:50%;background:#2d7a2d;display:inline-block;margin-right:3px"></span>Memorized</span><span><span style="width:9px;height:9px;border-radius:50%;background:#7b52c8;opacity:.6;display:inline-block;margin-right:3px"></span>Learning</span></div>`}
+function sbadge(k,s){const st=gst(k,s),got=gl(k,s),req=getReq(k,s);
+  if(st==='redo')return`<span class="bx bx-rd">Redo needed</span>`;
+  if(st==='satisfied')return`<span class="bx bx-ok">✓ Complete${ss(k,s).score?' · '+ss(k,s).score:''}</span>`;
+  if(st==='pending')return`<span class="bx bx-pn">Submitted — awaiting review</span>`;
+  if(got>0&&got<req)return`<span class="bx bx-pt">${got} of ${req} done</span>`;
+  if(got>=req)return`<span class="bx bx-ok">Ready to submit</span>`;
+  return`<span class="bx bx-nd">Not started</span>`;}
+function scc(k,s){const st=gst(k,s),got=gl(k,s),req=getReq(k,s);
+  return st==='redo'?'rd':st==='satisfied'?'ok':st==='pending'?'pn':(got>0&&got<req?'pt':(got>=req?'ok':''));}
+function buildPips(k,s){
+  const st=gst(k,s),got=gl(k,s),req=getReq(k,s),locked=st==='satisfied'||st==='pending'||st==='redo';
+  let h='';
+  for(let i=0;i<MAX_PIP;i++){const ir=i<req;
+    if(locked){const cls=ir?(st==='pending'?'sb':st==='satisfied'?'ap':'rp'):'lk';h+=`<div class="pip ${cls}" style="${!ir?'opacity:.2':''}">${ir?(st==='pending'?'●':st==='satisfied'?'✓':'✗'):'·'}</div>`;}
+    else{const f=i<got;h+=`<div class="pip ${f?'f':''}" onclick="tapPip('${k}','${s}',${i})" style="${!ir&&!f?'opacity:.4':''}">${f?(i+1):''}</div>`;}}
+  return h;}
+function subCard(k,s,jen=false){
+  if(isGrad(k,s))return`<div class="sc gr"><div class="sc-row"><div class="sc-info"><div class="sc-name" style="color:#888">${s}</div><span class="bx bx-gr">Course completed ✓</span></div></div></div>`;
+  if(!isToday(k,s))return`<div class="sc" style="opacity:.35"><div class="sc-row"><div class="sc-info"><div class="sc-name" style="color:#aaa">${s}</div><span style="font-size:11px;color:#ccc">Not today</span></div></div></div>`;
+  const st=gst(k,s),got=gl(k,s),req=getReq(k,s),locked=st==='satisfied'||st==='pending'||st==='redo',note=ss(k,s).redoNote;
+  return`<div class="sc ${scc(k,s)}">
+<div class="sc-row"><div class="sc-info"><div class="sc-name">${s}${req>1?`<span class="dtag">${req} req</span>`:''}</div><div style="margin-top:3px">${sbadge(k,s)}</div>${note&&st==='redo'?`<div style="font-size:11px;color:#5c0f0f;margin-top:3px;font-style:italic">"${note}"</div>`:''}</div>
+${st==='redo'?`<button class="nb" onclick="viewNote('${k}','${s}')">See note</button>`:''}
+${jen&&st==='pending'?`<div class="jacts"><button class="ab ab-ok" onclick="jAct('${k}','${s}','satisfied')">✓</button><button class="ab ab-sc" onclick="openScore('${k}','${s}')">Score</button><button class="ab ab-rd" onclick="openRedo('${k}','${s}')">Redo</button></div>`:''}
+${jen&&st==='notdone'?`<button class="ab ab-ok" onclick="jAct('${k}','${s}','satisfied')">Mark done</button>`:''}
+</div>
+${!locked?`<div class="pips">${buildPips(k,s)}<span style="font-size:12px;color:#666;margin-left:3px">${got}/${req}</span></div>
+${got>0?`<div style="margin-top:8px;display:flex;gap:8px"><button style="font-size:12px;padding:5px 11px;border-radius:6px;border:1px solid #ccc;background:none;cursor:pointer;color:#888;touch-action:manipulation" onclick="undoPip('${k}','${s}')">↩ Undo</button>
+${got>=req?`<button style="font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #d4a017;background:#fff8e1;cursor:pointer;color:#5c3a08;touch-action:manipulation" onclick="submitSub('${k}','${s}')">Submit →</button>`:''}</div>`:''}`:`<div class="pips">${buildPips(k,s)}</div>`}
+</div>`;}
+function dayNote(k){const b=BASE[k];if((DOW===6||DOW===0)&&b.wknd.length){return`<div style="background:#e8f5e8;border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:12px;color:#1a4a1a">${DOW===6?'Saturday':'Sunday'}: ${b.wknd.join(', ')} only</div>`;}return''}
+function vResHTML(r,verse){if(!r)return'';const wh=r.res?.length?`<div class="vres">${r.res.map(w=>w.status==='correct'?`<span class="wok">${w.word}</span>`:w.status==='wrong'?`<span class="wng">${w.word}</span><span style="font-size:11px;color:#888"> (${w.spoken||'?'})</span>`:`<span class="wms">[${w.word}]</span>`).join(' ')}</div>`:'';return`${wh}<div class="vscore ${r.passed?'pass':'fail'}">${r.passed?'Word perfect! Waiting for Mom to confirm.':'Not quite — listen and try again.'} ${r.pct}%</div>${r.heard?`<div class="vtx">You said: "${r.heard}"</div>`:''}${!r.passed&&verse?`<button class="spk" onclick="speak('${verse.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">🔊 Hear it again</button>`:''}`}
+function ieHTML(id,val,saveCmd){return`<textarea class="niv-inp" id="${id}">${val||''}</textarea><div style="display:flex;gap:6px;margin-top:5px"><button style="font-size:12px;padding:5px 11px;border-radius:6px;background:#5b2d8e;color:white;border:none;cursor:pointer" onclick="${saveCmd}">Save</button><button style="font-size:12px;padding:5px 11px;border-radius:6px;border:1px solid #ccc;background:none;cursor:pointer;color:#888" onclick="iEdit=null;render()">Cancel</button></div>`}
+
+// UI state
+let view='login',curKid=null,jenTab='queue',pinTarget=null,pinBuf='',modal=null,showSP=false;
+let hRange='7',hFrom='',hTo='',hKid='all';
+let qCh=1,kVT='browse',jQK='all';
+let spTab='subjects',nivCh=1,iEdit=null;
+let aVK=null,vR={},recog=null;
+
+// page renders
+function rLogin(){return topbar('<span style="font-size:17px">Restoring Roots</span>')+`<div class="login"><div style="font-size:36px;margin-bottom:12px">📚</div><h2>School Tracker</h2><p>Select your account</p><button class="lbtn j" onclick="go('jennifer')">Jennifer — Admin</button><button class="lbtn k" onclick="go('kidSelect')">Kids Login</button></div>`}
+
+function rKidSel(){return topbar('Who are you?',`<button class="pill" onclick="go('login')">Back</button>`)+`<div class="pg" style="padding-top:14px">${Object.keys(BASE).map(kid=>{const k=BASE[kid];const r=rdPend(kid).length;const{done,total}=dayProg(kid);return`<div class="kp" onclick="startPin('${kid}')"><div class="av">${k.name[0]}</div><div style="flex:1"><div style="font-size:15px;font-weight:500;color:#222">${k.name}</div><div style="font-size:12px;color:#666;margin-top:2px">${done}/${total} lessons today</div></div>${r?`<span class="bx bx-rd">!! ${r} redo !!</span>`:''}</div>`}).join('')}</div>`}
+
+function rPin(){const k=BASE[pinTarget];const wrong=pinBuf.length===4&&pinBuf!==k.pin;return topbar(`PIN — ${k.name}`,`<button class="pill" onclick="go('kidSelect');pinBuf=''">Back</button>`)+`<div class="pg" style="padding-top:28px;text-align:center"><div style="font-size:14px;color:#666;margin-bottom:6px">Enter ${k.name}'s 4-digit PIN</div>${wrong?`<div style="font-size:13px;color:#c0392b;margin-bottom:6px">Incorrect — try again</div>`:`<div style="height:22px"></div>`}<div class="pin-dots">${[0,1,2,3].map(i=>`<div class="pin-dot ${i<pinBuf.length?'on':''}"></div>`).join('')}</div><div class="pin-pad" style="margin-top:20px">${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>k===''?'<div></div>':`<button class="pin-key" onclick="pk('${k}')">${k}</button>`).join('')}</div></div>`}
+
+function rKid(){
+  const k=BASE[curKid];const redos=rdPend(curKid);const{done,total}=dayProg(curKid);const{total:qT}=kStats(curKid);
+  const banner=redos.length?`<div style="background:#c0392b;color:white;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="showRB()"><span style="font-size:13px;font-weight:500">!! ${k.name} — ${redos.length} item${redos.length>1?'s':''} need attention !!</span><span>›</span></div>`:'';
+  return banner+topbar(`${k.name}'s School`,`<button class="pill" onclick="go('kidSelect');pinBuf=''">Switch</button>`)+progBar(done,total)+
+  `<div class="tabs"><button class="tab ${kVT==='browse'?'on':''}" onclick="setKT('browse')">Subjects</button><button class="tab ${kVT==='myverses'?'on':''}" onclick="setKT('myverses')">My Verses${qT?' ('+qT+')':''}</button><button class="tab ${kVT==='addverses'?'on':''}" onclick="setKT('addverses')">+ Add Verses</button></div>
+<div class="pg">
+${kVT==='browse'?dayNote(curKid)+BASE[curKid].subjects.map(s=>subCard(curKid,s)).join(''):''}
+${kVT==='myverses'?rMyV(curKid):''}
+${kVT==='addverses'?rAddV(curKid):''}
+</div>`}
+
+function rMyV(kid){
+  const d=S.quizzing[kid]||{};const ks=Object.keys(d);
+  if(!ks.length)return`<div style="text-align:center;padding:32px;color:#888;font-size:14px">No verses chosen yet.<br><br>Tap <strong>+ Add Verses</strong> to pick from John.</div>`;
+  const learn=ks.filter(k=>d[k].checks<NEED),mem=ks.filter(k=>d[k].checks>=NEED);
+  const{total,mem:mc}=kStats(kid);
+  return`<div style="background:white;border-radius:9px;padding:12px;margin-bottom:12px;border:.5px solid #e0e0e0"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;font-weight:500;color:#222">Memory progress</span><span style="font-size:12px;color:#666">${mc}/${total} memorized</span></div>${dualBar(mc,total)}</div>
+<div class="ibox">Tap the mic to practice quoting a verse. A perfect attempt goes to Mom for confirmation.</div>
+${learn.length?`<div class="vsh">Learning (${learn.length})</div>${learn.map(key=>{const[c,v]=key.split(':');const chk=d[key].checks,txt=getNIV(c,v),vk=kid+'_'+key,lst=aVK===vk,res=vR[vk];
+return`<div class="qvc ${res?.passed&&res?.pending?'pc':''}"><div class="rl">John ${c}:${v}</div>${txt?`<div style="font-size:13px;color:#666;line-height:1.6;margin-bottom:5px">${txt}</div>`:`<div style="font-size:12px;color:#bbb;font-style:italic;margin-bottom:5px">Verse text coming soon</div>`}<div class="qcr">${[0,1,2,3,4].map(i=>`<div class="qck ${i<chk?'on':''}" style="cursor:default">${i<chk?'✓':''}</div>`).join('')}<span style="font-size:12px;color:#888;margin-left:5px">${chk}/${NEED}</span></div>${txt?`<button class="mic ${lst?'on':''}" onclick="${lst?'stopListen()':` listenV('${kid}','${key}')`}"><span style="font-size:18px;line-height:1">${lst?'⏹':'🎙'}</span><span>${lst?'Stop':'Practice quoting'}</span></button>`:''}${vResHTML(res,txt)}${res?.passed&&res?.pending?`<div class="pbdg">⏳ Waiting for Mom to confirm</div>`:''}</div>`;}).join('')}`:''}
+${mem.length?`<div class="vsh">Memorized ✓ (${mem.length})</div>${mem.map(key=>{const[c,v]=key.split(':');const txt=getNIV(c,v);return`<div class="qvc mem"><div class="rl mem">John ${c}:${v} — Memorized!</div>${txt?`<div style="font-size:13px;color:#1a4a1a;line-height:1.6">${txt}</div>`:''}</div>`;}).join('')}`:''}`;
+}
+
+function rAddV(kid){
+  const opts=Object.keys(JVC).map(c=>`<option value="${c}" ${parseInt(c)===qCh?'selected':''}>John ${c}</option>`).join('');
+  return`<div style="font-size:13px;color:#666;margin-bottom:9px">Pick a chapter, then tap + to add verses to your memory list.</div><select class="ch-sel" onchange="setQCh(this.value)">${opts}</select><div>${Array.from({length:JVC[qCh]},(_,i)=>{const v=i+1,txt=getNIV(qCh,v),added=hasV(kid,qCh,v),mem=isMem(kid,qCh,v);return`<div class="vr"><div class="vn">${v}</div><div class="vt">${txt||`<span class="vt-none">Verse ${v} — text not yet added</span>`}</div><button class="vadd ${mem?'mem':added?'on':''}" onclick="${added||mem?'':` addV('${kid}',${qCh},${v})`}">${mem?'✓':added?'✓':'+'}</button></div>`;}).join('')}</div>`}
+
+function rJen(){
+  const q=pendQ(),rd=allRd(),vp=Object.values(vR).filter(r=>r.passed&&r.pending).length;
+  return topbar('School Tracker',`<button class="gear" onclick="toggleSP()">⚙</button><button class="pill" onclick="go('login')">Switch</button>`)+
+  (rd.length?`<div style="background:#fdecea;padding:8px 14px;border-bottom:2px solid #c0392b;font-size:13px;color:#5c0f0f"><strong>Redo pending:</strong> ${rd.map(k=>BASE[k].name).join(', ')}</div>`:'')+
+  (vp?`<div style="background:#fff8e1;padding:8px 14px;border-bottom:2px solid #d4a017;font-size:13px;color:#5c3a08;cursor:pointer" onclick="setJT('quizzing')">⏳ <strong>${vp} voice attempt${vp>1?'s':''}</strong> waiting for confirmation</div>`:'')+
+  `<div class="tabs"><button class="tab ${jenTab==='queue'?'on':''}" onclick="setJT('queue')">Queue${q.length?' ('+q.length+')':''}</button><button class="tab ${jenTab==='all'?'on':''}" onclick="setJT('all')">All</button><button class="tab ${jenTab==='tj'?'on':''}" onclick="setJT('tj')">TJ</button><button class="tab ${jenTab==='laura'?'on':''}" onclick="setJT('laura')">Laura</button><button class="tab ${jenTab==='audrey'?'on':''}" onclick="setJT('audrey')">Audrey</button><button class="tab ${jenTab==='zach'?'on':''}" onclick="setJT('zach')">Zachary</button><button class="tab ${jenTab==='quizzing'?'on':''}" onclick="setJT('quizzing')">Quizzing${vp?' ⏳':''}</button><button class="tab ${jenTab==='history'?'on':''}" onclick="setJT('history')">History</button></div>
+<div class="pg">${jenTab==='queue'?rQueue():jenTab==='all'?rAll():['tj','laura','audrey','zach'].includes(jenTab)?rKD(jenTab):jenTab==='quizzing'?rJQ():rHist()}</div>`}
+
+function rQueue(){const q=pendQ();if(!q.length)return`<div style="text-align:center;padding:32px;color:#888;font-size:14px">No submissions waiting ✓</div>`;return`<div class="sh">Waiting for review</div>${q.map(({kid,sub})=>{const k=BASE[kid],got=gl(kid,sub),req=getReq(kid,sub);return`<div class="sc pn"><div class="sc-row"><div class="av" style="width:32px;height:32px;font-size:13px">${k.name[0]}</div><div class="sc-info"><div class="sc-name">${sub}</div><div style="font-size:12px;color:#666">${k.name} · ${got}/${req} lesson${req>1?'s':''}</div></div><div class="jacts"><button class="ab ab-ok" onclick="jAct('${kid}','${sub}','satisfied')">✓</button><button class="ab ab-sc" onclick="openScore('${kid}','${sub}')">Score</button><button class="ab ab-rd" onclick="openRedo('${kid}','${sub}')">Redo</button></div></div></div>`;}).join('')}`}
+
+function rAll(){return`<div class="sh">Today's overview</div><div class="kgrid">${Object.keys(BASE).map(kid=>{const k=BASE[kid];const{done,total}=dayProg(kid);const p=total?Math.round(done/total*100):0;const{total:qT,mem:qM}=kStats(kid);return`<div class="kcard ${k.color}" onclick="setJT('${kid}')"><div class="kcard-nm">${k.name}</div><div class="dots">${BASE[kid].subjects.map(s=>{if(isGrad(kid,s))return`<div class="dot dot-gr"></div>`;const st=gst(kid,s),got=gl(kid,s),req=getReq(kid,s),c=st==='satisfied'?'ok':st==='pending'?'pn':st==='redo'?'rd':(got>0&&got<req?'pt':'nd');return`<div class="dot dot-${c}"></div>`}).join('')}</div><div style="font-size:11px;margin-top:6px;color:#888">${p}% · ${done}/${total} lessons</div>${qT?`<div style="font-size:10px;color:#7b52c8;margin-top:2px">${qM}/${qT} verses memorized</div>`:''}</div>`;}).join('')}</div>`}
+
+function rKD(kid){const k=BASE[kid];return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><div class="sh" style="margin:0">${k.name}'s subjects</div><button style="font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid #c0392b;background:#fdecea;color:#5c0f0f;cursor:pointer" onclick="resetKid('${kid}')">Reset day</button></div>${k.subjects.map(s=>subCard(kid,s,true)).join('')}`}
+
+function rJQ(){
+  const kids=jQK==='all'?Object.keys(BASE):[jQK];
+  return`<div class="flt"><button class="fs ${jQK==='all'?'on':''}" onclick="setJQK('all')">All kids</button>${Object.keys(BASE).map(k=>`<button class="fs ${jQK===k?'on':''}" onclick="setJQK('${k}')">${BASE[k].name}</button>`).join('')}</div>
+${kids.map(kid=>{const k=BASE[kid],d=S.quizzing[kid]||{},ks=Object.keys(d);const{total,mem}=kStats(kid);
+if(!ks.length)return`<div style="margin-bottom:14px"><div class="qkh ${k.color}">${k.name}</div><div style="font-size:13px;color:#888;padding-bottom:10px">No verses selected yet.</div></div>`;
+const learn=ks.filter(k=>d[k].checks<NEED),memorized=ks.filter(k=>d[k].checks>=NEED);
+return`<div style="margin-bottom:16px"><div class="qkh ${k.color}">${k.name} — ${mem}/${total} memorized</div>${dualBar(mem,total)}<div style="margin-bottom:10px"></div>
+${learn.length?`<div class="vsh">Quiz these (${learn.length})</div>${learn.map(key=>{const[c,v]=key.split(':'),chk=d[key].checks,txt=getNIV(c,v),vk=kid+'_'+key,res=vR[vk],isPend=res?.passed&&res?.pending,lst=aVK===vk,isIE=iEdit?.key==='j_'+kid+'_'+key;
+return`<div class="qvc ${isPend?'pc':''}"><div class="rl">John ${c}:${v}</div>
+${isIE?ieHTML('ie_j_'+kid+'_'+key,iEdit.value,`saveIE('${kid}','${key}')`):txt?`<div style="font-size:13px;color:#666;line-height:1.6;margin-top:3px">${txt}</div><button class="ev" onclick="startIE('j_${kid}_${key}','${txt.replace(/'/g,"\\'").replace(/\n/g,' ')}')">Edit text</button>`:`<div style="font-size:12px;color:#bbb;font-style:italic;margin-top:3px">No NIV text yet</div><button class="ev" style="color:#5b2d8e;border-color:#5b2d8e" onclick="startIE('j_${kid}_${key}','')">+ Add NIV text</button>`}
+${isPend?`<div style="background:#fff8e1;border:1px solid #d4a017;border-radius:8px;padding:9px 11px;margin-top:9px"><div style="font-size:13px;font-weight:500;color:#5c3a08;margin-bottom:4px">Voice attempt passed — confirm?</div><div style="font-size:12px;color:#5c3a08;margin-bottom:8px">Said: "${res.heard}"</div>${res.res?`<div class="vres" style="margin-bottom:9px">${res.res.map(w=>w.status==='correct'?`<span class="wok">${w.word}</span>`:w.status==='wrong'?`<span class="wng">${w.word}</span>`:`<span class="wms">[${w.word}]</span>`).join(' ')}</div>`:''}<div style="display:flex;gap:8px"><button class="ab ab-ok" onclick="confV('${kid}','${key}')">✓ Count this check</button><button class="ab ab-rd" onclick="denyV('${kid}','${key}')">✗ Try again</button></div></div>`:`<div class="qcr">${[0,1,2,3,4].map(i=>`<button class="qck ${i<chk?'on':''}" onclick="${i<chk?'':` jChk('${kid}','${key}',${i})`}" ${i<chk?'disabled':''}>${i<chk?'✓':''}</button>`).join('')}<span style="font-size:12px;color:#888;margin-left:5px">${chk}/${NEED}</span></div>${txt?`<button class="mic ${lst?'on':''}" onclick="${lst?'stopListen()':` listenV('${kid}','${key}')`}"><span style="font-size:18px;line-height:1">${lst?'⏹':'🎙'}</span><span>${lst?'Stop':'Quiz by voice'}</span></button>`:''}`}
+</div>`;}).join('')}`:''}
+${memorized.length?`<div class="vsh">Memorized ✓ (${memorized.length})</div>${memorized.map(key=>{const[c,v]=key.split(':'),txt=getNIV(c,v);return`<div class="qvc mem"><div class="rl mem">John ${c}:${v} — Memorized!</div>${txt?`<div style="font-size:13px;color:#1a4a1a;line-height:1.6">${txt}</div>`:''}</div>`;}).join('')}`:''}
+</div>`;}).join('')}`}
+
+function rHist(){let f=[...S.history||[]];const now=new Date();const cuts={'7':7,'30':30,'90':90};if(cuts[hRange]){const c=new Date(now-cuts[hRange]*864e5).toISOString().slice(0,10);f=f.filter(e=>e.date>=c);}else if(hRange==='custom'&&hFrom&&hTo)f=f.filter(e=>e.date>=hFrom&&e.date<=hTo);if(hKid!=='all')f=f.filter(e=>e.kid===hKid);f.reverse();
+return`<div class="flt">${['7','30','90'].map(d=>`<button class="fs ${hRange===d?'on':''}" onclick="setHR('${d}')">${d} days</button>`).join('')}<button class="fs ${hRange==='custom'?'on':''}" onclick="setHR('custom')">Custom</button></div>${hRange==='custom'?`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><input type="date" class="inp" style="width:145px" value="${hFrom}" oninput="hFrom=this.value;render()"><span style="font-size:13px;color:#666">to</span><input type="date" class="inp" style="width:145px" value="${hTo}" oninput="hTo=this.value;render()"></div>`:''}<div class="flt"><button class="fs ${hKid==='all'?'on':''}" onclick="setHK('all')">All</button>${Object.keys(BASE).map(k=>`<button class="fs ${hKid===k?'on':''}" onclick="setHK('${k}')">${BASE[k].name}</button>`).join('')}</div>${!f.length?`<div style="text-align:center;padding:24px;color:#888;font-size:14px">No records in this range</div>`:''}${f.map(e=>{const col=e.action==='satisfied'?'#2d7a2d':e.action==='redo'?'#c0392b':e.action==='score'?'#5b2d8e':e.action==='submitted'?'#d4a017':(e.action==='quiz-check'||e.action==='voice-pass')?'#7b52c8':'#888';return`<div class="hr"><div style="color:#666;min-width:84px">${e.date}</div><div style="flex:1"><span style="font-weight:500;color:#222">${BASE[e.kid]?.name||e.kid}</span><span style="color:#666"> — ${e.subject}</span></div><span style="font-size:11px;padding:2px 8px;border-radius:8px;background:${col}22;color:${col};white-space:nowrap">${e.action}${e.detail?' '+e.detail:''}</span></div>`;}).join('')}`}
+
+function rSP(){return`<div class="sp"><div class="sp-tb"><h1>Settings</h1><button class="pill" onclick="toggleSP()">Done</button></div><div class="tabs"><button class="tab ${spTab==='subjects'?'on':''}" onclick="setSPT('subjects')" style="flex:1">Subjects</button><button class="tab ${spTab==='niv'?'on':''}" onclick="setSPT('niv')" style="flex:1">NIV Verse Text</button></div>${spTab==='subjects'?rSPS():rSPN()}<div style="height:30px"></div></div>`}
+
+function rSPS(){return`<div class="ibox">Graduating a subject locks it as completed. Tap <em>Unlock</em> to reopen for a new school year.</div><div class="sp-sec"><h3>Subject status by child</h3>${Object.keys(BASE).map(kid=>{const k=BASE[kid];return`<div class="sp-kid"><div class="sp-kn ${k.color}">${k.name}</div>${k.subjects.map(s=>{const grad=isGrad(kid,s),gd=gradDate(kid,s);return`<div class="sp-row"><div style="flex:1"><span style="font-size:13px;color:#222">${s}</span>${grad?`<span class="gn">Graduated${gd?' '+gd:''}</span>`:''}</div>${grad?`<button class="tg locked" onclick="toggleGrad('${kid}','${s}')">Unlock ↩</button>`:`<button class="tg open" onclick="toggleGrad('${kid}','${s}')">Graduate</button>`}</div>`;}).join('')}</div>`;}).join('')}</div>`}
+
+function rSPN(){const count=JVC[nivCh];const entered=Array.from({length:count},(_,i)=>getNIV(nivCh,i+1)?1:0).reduce((a,b)=>a+b,0);const opts=Object.keys(JVC).map(c=>`<option value="${c}" ${parseInt(c)===nivCh?'selected':''}>John ${c}</option>`).join('');return`<div class="ibox">Paste NIV text for each verse. <strong>${entered}/${count} entered</strong> for John ${nivCh}.</div><div class="sp-sec"><select class="ch-sel" onchange="setNC(this.value)">${opts}</select>${Array.from({length:count},(_,i)=>{const v=i+1,key=nivCh+':'+v,ex=getNIV(nivCh,v),isIE=iEdit?.key==='sp_'+key;return`<div class="niv-row"><div class="niv-lbl">John ${nivCh}:${v}</div>${isIE?ieHTML('ie_sp_'+key,iEdit.value,`saveSP('${key}')`):ex?`<div style="font-size:13px;color:#222;line-height:1.6">${ex}</div><button class="ev" style="margin-top:3px" onclick="startIE('sp_${key}','${ex.replace(/'/g,"\\'").replace(/\n/g,' ')}')">Edit</button>`:`<button class="ev" style="color:#5b2d8e;border-color:#5b2d8e;font-size:12px;padding:4px 10px" onclick="startIE('sp_${key}','')">+ Enter NIV text</button>`}</div>`;}).join('')}</div>`}
+
+function rMod(){if(!modal)return'';if(modal.type==='redo')return`<div class="mbg"><div class="md" style="border-top:4px solid #c0392b"><h2 style="color:#5c0f0f">!! Redo !!</h2><div class="md-sub">Subject: <strong>${modal.sub}</strong></div><div class="md-note">${modal.note||'Please redo this subject.'}</div><div class="md-acts"><button class="btn-red" onclick="closeM()">Got it!</button></div></div></div>`;if(modal.type==='redoInput')return`<div class="mbg"><div class="md" style="border-top:4px solid #c0392b"><h2>Send Redo</h2><div class="md-sub">${BASE[modal.kid].name} — <strong>${modal.sub}</strong></div><textarea class="ta" id="ri" placeholder="Type instructions..."></textarea><div class="md-acts"><button class="btn-cxl" onclick="closeM()">Cancel</button><button class="btn-red" onclick="confRedo()">Send Redo</button></div></div></div>`;if(modal.type==='score')return`<div class="mbg"><div class="md" style="border-top:4px solid #5b2d8e"><h2>Add Score</h2><div class="md-sub">${BASE[modal.kid].name} — <strong>${modal.sub}</strong></div><div style="display:flex;gap:9px;align-items:center;margin:12px 0"><input type="text" class="inp" id="si" style="width:110px" placeholder="95 or A+"><button class="btn-pur" onclick="confScore()">Save</button><button class="btn-cxl" onclick="closeM()">Cancel</button></div><button class="ab ab-ok" onclick="jAct(modal.kid,modal.sub,'satisfied');closeM()">Mark satisfied without score</button></div></div>`;if(modal.type==='grad')return`<div class="mbg"><div class="md" style="border-top:4px solid #888"><h2>Graduate subject?</h2><div class="md-sub">${BASE[modal.kid].name} — <strong>${modal.sub}</strong></div><div style="font-size:14px;color:#666;margin-bottom:14px;line-height:1.6">This will lock <strong>${modal.sub}</strong> as completed. Unlock anytime in settings.</div><div class="md-acts"><button class="btn-cxl" onclick="closeM()">Cancel</button><button class="btn-pur" style="flex:1" onclick="confGrad()">Yes, graduate</button></div></div></div>`;return''}
+
+function render(){
+  let h='';
+  if(view==='login')h=rLogin();
+  else if(view==='kidSelect')h=rKidSel();
+  else if(view==='pin')h=rPin();
+  else if(view==='kid')h=rKid();
+  else if(view==='jennifer')h=rJen();
+  h+=rMod();
+  if(showSP)h+=rSP();
+  document.getElementById('app').innerHTML=h;
+}
+
+// actions
+function go(v){view=v;render()}
+function startPin(kid){pinTarget=kid;pinBuf='';view='pin';render()}
+function pk(k){if(k==='⌫'){pinBuf=pinBuf.slice(0,-1);render();return}if(pinBuf.length>=4)return;pinBuf+=k;if(pinBuf.length===4){if(pinBuf===BASE[pinTarget].pin){curKid=pinTarget;view='kid';pinBuf='';render();}else render();}else render()}
+function toggleSP(){showSP=!showSP;iEdit=null;render()}
+function setSPT(t){spTab=t;iEdit=null;render()}
+function setNC(c){nivCh=parseInt(c);iEdit=null;render()}
+function startIE(key,val){iEdit={key,value:val};render()}
+function saveIE(kid,vk){const el=document.getElementById('ie_j_'+kid+'_'+vk);if(el){S.nivText[vk]=el.value.trim();iEdit=null;persist();render();}}
+function saveSP(key){const el=document.getElementById('ie_sp_'+key);if(el){S.nivText[key]=el.value.trim();iEdit=null;persist();render();}}
+function gradDate(k,s){const e=[...S.history||[]].reverse().find(h=>h.kid===k&&h.subject===s&&h.action==='graduated');return e?e.date:''}
+function toggleGrad(k,s){const list=S.graduated[k]||[];if(list.includes(s)){S.graduated[k]=list.filter(x=>x!==s);S.subjects[k][s]={status:'notdone',lessons:0,redoNote:'',score:'',redoSeen:false};logH(k,s,'unlocked');persist();render();}else{modal={type:'grad',kid:k,sub:s};render();}}
+function confGrad(){S.graduated[modal.kid]=S.graduated[modal.kid]||[];S.graduated[modal.kid].push(modal.sub);logH(modal.kid,modal.sub,'graduated');modal=null;persist();render()}
+function tapPip(k,s,i){const o=ss(k,s);if(o.status==='satisfied'||o.status==='pending'||o.status==='redo')return;const got=o.lessons||0;if(i<got){if(i===got-1)o.lessons=got-1;else return;}else if(i===got)o.lessons=got+1;else o.lessons=i+1;if(o.lessons<=0)o.status='notdone';persist();render()}
+function undoPip(k,s){const o=ss(k,s);if(o.status==='satisfied'||o.status==='pending'||o.status==='redo')return;if(o.lessons>0)o.lessons--;if(o.lessons===0)o.status='notdone';persist();render()}
+function submitSub(k,s){const o=ss(k,s);o.status='pending';logH(k,s,'submitted',o.lessons+'/'+getReq(k,s));persist();render()}
+function viewNote(k,s){ss(k,s).redoSeen=true;modal={type:'redo',sub:s,note:ss(k,s).redoNote};persist();render()}
+function showRB(){if(!curKid)return;const r=rdPend(curKid);if(r.length){ss(curKid,r[0]).redoSeen=true;modal={type:'redo',sub:r[0],note:ss(curKid,r[0]).redoNote};persist();render();}}
+function closeM(){modal=null;render()}
+function setJT(t){jenTab=t;render()}
+function setHR(r){hRange=r;render()}
+function setHK(f){hKid=f;render()}
+function setKT(t){kVT=t;render()}
+function setJQK(f){jQK=f;render()}
+function setQCh(c){qCh=parseInt(c);render()}
+function addV(kid,c,v){S.quizzing[kid]=S.quizzing[kid]||{};const key=c+':'+v;if(S.quizzing[kid][key])return;S.quizzing[kid][key]={checks:0,added:TODAY};persist();render()}
+function confV(kid,key){const vk=kid+'_'+key,res=vR[vk];if(!res)return;S.quizzing[kid][key].checks=Math.min(NEED,(S.quizzing[kid][key].checks||0)+1);res.pending=false;logH(kid,'John '+key,'voice-pass',S.quizzing[kid][key].checks+'/'+NEED);persist();render()}
+function denyV(kid,key){delete vR[kid+'_'+key];render()}
+function jChk(kid,key,i){S.quizzing[kid][key].checks=i+1;logH(kid,'John '+key,'quiz-check',S.quizzing[kid][key].checks+'/'+NEED);persist();render()}
+function jAct(k,s,a){ss(k,s).status=a;logH(k,s,a);persist();render()}
+function openRedo(k,s){modal={type:'redoInput',kid:k,sub:s};render()}
+function openScore(k,s){modal={type:'score',kid:k,sub:s};render()}
+function confRedo(){const el=document.getElementById('ri');const note=el?el.value.trim():'';const o=ss(modal.kid,modal.sub);o.status='redo';o.redoNote=note;o.redoSeen=false;logH(modal.kid,modal.sub,'redo',note);modal=null;persist();render()}
+function confScore(){const el=document.getElementById('si');const score=el?el.value.trim():'';const o=ss(modal.kid,modal.sub);o.status='satisfied';o.score=score;logH(modal.kid,modal.sub,'score',score);modal=null;persist();render()}
+function resetKid(k){BASE[k].subjects.forEach(s=>{if(isGrad(k,s))return;S.subjects[k][s]={status:'notdone',lessons:0,redoNote:'',score:'',redoSeen:false}});persist();render()}
+
+// expose all to inline handlers
+window.go=go;window.startPin=startPin;window.pk=pk;window.toggleSP=toggleSP;
+window.setSPT=setSPT;window.setNC=setNC;window.startIE=startIE;
+window.saveIE=saveIE;window.saveSP=saveSP;window.toggleGrad=toggleGrad;
+window.confGrad=confGrad;window.tapPip=tapPip;window.undoPip=undoPip;
+window.submitSub=submitSub;window.viewNote=viewNote;window.showRB=showRB;
+window.closeM=closeM;window.setJT=setJT;window.setHR=setHR;window.setHK=setHK;
+window.setKT=setKT;window.setJQK=setJQK;window.setQCh=setQCh;window.addV=addV;
+window.confV=confV;window.denyV=denyV;window.jChk=jChk;window.jAct=jAct;
+window.openRedo=openRedo;window.openScore=openScore;window.confRedo=confRedo;
+window.confScore=confScore;window.resetKid=resetKid;
+window.listenV=listenV;window.stopListen=stopListen;window.speak=speak;
+
+render();
+</script>
+</body>
+</html>
